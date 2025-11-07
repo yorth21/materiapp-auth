@@ -1,0 +1,103 @@
+# ───────────────────────────────
+# Node / NPM (por si usas scripts JS)
+# ───────────────────────────────
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+package-lock.json
+
+# ───────────────────────────────
+# Docker / Compose
+# ───────────────────────────────
+# Datos persistentes de contenedores
+kcdb_data/
+**/kcdb_data/
+*.pid
+*.seed
+.docker/
+docker-compose.override.yml
+
+# ───────────────────────────────
+# Keycloak runtime y export temporales
+# ───────────────────────────────
+# Archivos exportados desde contenedor
+/tmp/
+**/tmp/
+**/export/
+*.realm-export.json
+*.realm-import.json
+
+# Evitar incluir exports manuales fuera de /realms/
+!realms/*.json
+
+# ───────────────────────────────
+# Archivos del sistema / IDEs
+# ───────────────────────────────
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Linux
+.Trash-*
+
+# IDEs
+.idea/
+.vscode/
+*.swp
+*.swo
+*.swn
+*.bak
+*.orig
+
+# ───────────────────────────────
+# Logs
+# ───────────────────────────────
+*.log
+logs/
+**/logs/
+**/log/
+*.out
+*.err
+
+# ───────────────────────────────
+# Credenciales / Variables locales
+# ───────────────────────────────
+.env
+.env.local
+.env.*.local
+
+# ───────────────────────────────
+# Backups / Archivos temporales
+# ───────────────────────────────
+*.tmp
+*.temp
+*.bak
+*.old
+*.save
+*.backup
+*.tar
+*.zip
+*.gz
+*.tgz
+*.7z
+
+# ───────────────────────────────
+# Python / Shell tools (si usas scripts auxiliares)
+# ───────────────────────────────
+__pycache__/
+*.py[cod]
+*.sh~
+*.bash_history
+
+# ───────────────────────────────
+# Realm exports (fuera del control)
+# ───────────────────────────────
+realms/exported/

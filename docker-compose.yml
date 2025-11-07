@@ -1,0 +1,32 @@
+version: "3.9"
+services:
+  kcdb:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: ${KC_DB_NAME}
+      POSTGRES_USER: ${KC_DB_USER}
+      POSTGRES_PASSWORD: ${KC_DB_PASSWORD}
+    ports:
+      - "${KC_DB_PORT}:5432"
+    volumes:
+      - kcdb_data:/var/lib/postgresql/data
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.0
+    command: start-dev --import-realm
+    environment:
+      KC_DB: ${KC_DB}
+      KC_DB_USERNAME: ${KC_DB_USER}
+      KC_DB_PASSWORD: ${KC_DB_PASSWORD}
+      KC_DB_URL: jdbc:postgresql://${KC_DB_HOST}:5432/${KC_DB_NAME}
+      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN}
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
+    volumes:
+      - ./realms:/opt/keycloak/data/import
+    ports:
+      - "${KC_HTTP_PORT}:8080"
+    depends_on:
+      - kcdb
+
+volumes:
+  kcdb_data:
