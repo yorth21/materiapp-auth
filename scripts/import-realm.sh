@@ -1,52 +1,35 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-REALM_FILE=./realms/materiapp-realm.json
-TEMP_FILE=/tmp/materiapp-realm-import.json
-FRONTEND_URL=${FRONTEND_URL:-"http://localhost:4200"}
+# Configuración
+REALM_NAME="materiapp"
+REALM_FILE="./realms/${REALM_NAME}-realm.json"
+TEMP_FILE="/tmp/${REALM_NAME}-realm-import.json"
+KEYCLOAK_IMAGE="quay.io/keycloak/keycloak:26.0"
+FRONTEND_URL="${FRONTEND_URL:-http://localhost:4200}"
+
+# Verificar dependencias
+command -v docker >/dev/null 2>&1 || { echo "Error: Docker no está instalado" >&2; exit 1; }
+command -v sed >/dev/null 2>&1 || { echo "Error: sed no está instalado" >&2; exit 1; }
 
 # Verificar que el archivo del realm existe
-if [ ! -f "$REALM_FILE" ]; then
-    echo "❌ Error: No se encontró el archivo del realm: $REALM_FILE"
-    exit 1
-fi
-
-echo "🔄 Preparando realm para importación..."
-
-# Reemplazar variables de entorno en el archivo del realm
-sed "s|{{FRONTEND_URL}}|$FRONTEND_URL|g" "$REALM_FILE" > "$TEMP_FILE"
+[ ! -f "$REALM_FILE" ] && { echo "Error: No se encontró $REALM_FILE" >&2; exit 1; }
 
 # Buscar contenedor de Keycloak
-CID=$(docker ps --filter "ancestor=quay.io/keycloak/keycloak:26.0" --format "{{.ID}}")
+CID=$(docker ps --filter "ancestor=$KEYCLOAK_IMAGE" --format "{{.ID}}" | head -n 1)
+[ -z "$CID" ] && { echo "Error: No se encontró contenedor de Keycloak" >&2; exit 1; }
 
-if [ -z "$CID" ]; then
-    echo "❌ Error: No se encontró un contenedor de Keycloak en ejecución"
-    echo "   Inicia Keycloak primero con: docker-compose up -d"
-    exit 1
-fi
+# Reemplazar variables de entorno
+sed "s|{{FRONTEND_URL}}|$FRONTEND_URL|g" "$REALM_FILE" > "$TEMP_FILE"
 
-echo "📋 Copiando archivo al contenedor..."
-docker cp "$TEMP_FILE" "$CID":/tmp/materiapp-realm-import.json
+# Copiar e importar
+docker cp "$TEMP_FILE" "$CID:/tmp/${REALM_NAME}-realm-import.json" 2>/dev/null || { echo "Error: Falló la copia" >&2; exit 1; }
 
-echo "📥 Importando realm en Keycloak..."
 docker exec "$CID" /opt/keycloak/bin/kc.sh import \
-    --file /tmp/materiapp-realm-import.json
+    --file "/tmp/${REALM_NAME}-realm-import.json" >/dev/null 2>&1 || { echo "Error: Falló la importación" >&2; exit 1; }
 
-if [ $? -eq 0 ]; then
-    echo "✅ Realm importado exitosamente"
-    echo ""
-    echo "📝 Pasos adicionales requeridos:"
-    echo "   1. Crear usuarios manualmente en la consola de administración"
-    echo "   2. Configurar secretos de clientes si es necesario"
-    echo "   3. Verificar URLs de redirección según el entorno"
-    echo ""
-    echo "🌐 Consola de administración: http://localhost:8080/admin"
-    echo "   Usuario: admin"
-    echo "   Contraseña: admin"
-else
-    echo "❌ Error al importar el realm"
-    exit 1
-fi
-
-# Limpiar archivo temporal
+# Limpiar
 rm -f "$TEMP_FILE"
+docker exec "$CID" rm -f "/tmp/${REALM_NAME}-realm-import.json" 2>/dev/null || true
+
+echo "✅ Realm importado con usuarios de desarrollo"
