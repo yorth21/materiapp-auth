@@ -12,11 +12,7 @@ services:
 
   keycloak:
     image: quay.io/keycloak/keycloak:26.0
-    command: >
-      start-dev --import-realm
-      --spi-theme-static-max-age=-1
-      --spi-theme-cache-themes=false
-      --spi-theme-cache-templates=false
+    command: start-dev
     environment:
       KC_DB: ${KC_DB}
       KC_DB_USERNAME: ${KC_DB_USER}
@@ -25,7 +21,6 @@ services:
       KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN}
       KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
     volumes:
-      - ./realms:/opt/keycloak/data/import
       - ./themes:/opt/keycloak/themes
     ports:
       - "${KC_HTTP_PORT}:8080"
