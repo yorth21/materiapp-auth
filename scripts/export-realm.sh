@@ -30,7 +30,7 @@ docker cp "$CID:/tmp/export/$REALM_NAME-realm.json" "$TEMP_FILE" 2>/dev/null || 
 
 jq 'del(.id) |
     del(.roles.realm[]?.id) |
-    del(.roles.client) |
+    del(.roles.client[]?[]?.id) |
     del(.clients[]?.id) |
     del(.clients[]?.secret) |
     del(.clientScopes[]?.id) |
@@ -39,12 +39,14 @@ jq 'del(.id) |
     del(.authenticationFlows[]?.id) |
     del(.authenticationFlows[]?.authenticationExecutions[]?.id) |
     del(.authenticatorConfig[]?.id) |
-    del(.components?"org.keycloak.services.clientregistration.policy.ClientRegistrationPolicy"[]?.id) |
-    del(.components?"org.keycloak.keys.KeyProvider"[]?.id) |
+    del(.components?.["org.keycloak.services.clientregistration.policy.ClientRegistrationPolicy"][]?.id) |
+    del(.components?.["org.keycloak.keys.KeyProvider"][]?.id) |
     del(.groups[]?.id) |
     # Limpiar IDs de usuarios pero mantener la estructura
     del(.users[]?.id) |
     del(.users[]?.createdTimestamp) |
+    del(.users[]?.credentials[]?.id) |
+    del(.users[]?.credentials[]?.createdDate) |
     # Reemplazar URLs específicas del entorno con placeholders
     (.clients[] | select(.clientId == "materiapp-web")? | .rootUrl) = "{{FRONTEND_URL}}" |
     (.clients[] | select(.clientId == "materiapp-web")? | .adminUrl) = "{{FRONTEND_URL}}" |
