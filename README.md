@@ -7,7 +7,7 @@ Este proyecto define la configuración de Keycloak **como código**, incluyendo 
 
 ## 📘 Contenido del repositorio
 
-```
+``` tree
 materiapp-identity/
 ├─ themes/
 │  └─ materiapp/
@@ -105,7 +105,7 @@ Este proyecto incluye un tema personalizado para Keycloak con un diseño moderno
 
 ### Estructura del tema
 
-```
+``` tree
 themes/materiapp/login/
 ├── login.ftl              # Página de inicio de sesión
 ├── register.ftl           # Página de registro
